@@ -14,7 +14,10 @@
     {"name": "少数派",              "url": "https://sspai.com/feed"},
     {"name": "爱范儿",              "url": "https://www.ifanr.com/feed"},
     {"name": "量子位",              "url": "https://www.qbitai.com/feed"},
-    {"name": "机器之心",            "url": "https://www.jiqizhixin.com/rss"}
+    {"name": "机器之心",            "url": "https://www.jiqizhixin.com/rss"},
+    {"name": "NodeSeek",           "url": "https://rss.nodeseek.com/"},
+    {"name": "Linux.do",           "url": "https://linux.do/latest.rss"},
+    {"name": "V2EX",               "url": "https://www.v2ex.com/index.xml"}
   ],
   "hn_queries": ["AI free credits", "free tier LLM", "open source model release"],
   "reddit_subs": ["LocalLLaMA", "artificial", "ChatGPT"]
