@@ -1,0 +1,34 @@
+name: AI Radar Daily
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # UTC 00:00 = 北京时间 08:00
+  workflow_dispatch:        # 支持在 Actions 页面手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 运行雷达
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+        run: python3 ai_radar.py
+
+      - name: 提交当日简报
+        run: |
+          git config user.name "ai-radar-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add reports/ seen.json
+          git diff --cached --quiet || git commit -m "📡 雷达简报 $(TZ=Asia/Shanghai date +%F)"
+          git push

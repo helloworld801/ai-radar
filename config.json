@@ -1,0 +1,18 @@
+{
+  "hours": 26,
+  "min_score": 1,
+  "top_candidates": 5,
+  "rss_sources": [
+    {"name": "OpenAI Blog",        "url": "https://openai.com/news/rss.xml"},
+    {"name": "Google AI Blog",     "url": "https://blog.google/technology/ai/rss/"},
+    {"name": "Hugging Face Blog",  "url": "https://huggingface.co/blog/feed.xml"},
+    {"name": "TechCrunch AI",      "url": "https://techcrunch.com/category/artificial-intelligence/feed/"},
+    {"name": "VentureBeat AI",     "url": "https://venturebeat.com/category/ai/feed/"},
+    {"name": "The Verge AI",       "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"},
+    {"name": "MIT Tech Review AI", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed"},
+    {"name": "少数派",              "url": "https://sspai.com/feed"},
+    {"name": "爱范儿",              "url": "https://www.ifanr.com/feed"}
+  ],
+  "hn_queries": ["AI free credits", "free tier LLM", "open source model release"],
+  "reddit_subs": ["LocalLLaMA", "artificial", "ChatGPT"]
+}
