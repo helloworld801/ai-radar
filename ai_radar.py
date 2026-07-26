@@ -258,6 +258,45 @@ def fetch_reddit(sub):
 # 分类打分 / 去重 / 报告
 # --------------------------------------------------------------------------
 
+CJK_RE = re.compile(r"[一-鿿]")
+
+
+def translate_zh(text):
+    """把英文文本翻译成中文(零依赖,走 Google 免费翻译接口)。
+    失败时返回 None,不影响主流程。已含中文的文本直接跳过。"""
+    text = (text or "").strip()
+    if not text or CJK_RE.search(text):
+        return None
+    try:
+        url = ("https://translate.googleapis.com/translate_a/single"
+               "?client=gtx&sl=auto&tl=zh-CN&dt=t&q=" +
+               urllib.parse.quote(text[:500]))
+        data = json.loads(http_get(url, timeout=12).decode("utf-8"))
+        return "".join(seg[0] for seg in data[0] if seg and seg[0]).strip() or None
+    except Exception:
+        return None
+
+
+def translate_items(grouped, config):
+    """给收录条目补上中文标题 it['zh'](上限 40 条,防止超时)。"""
+    if not config.get("translate_to_zh", True):
+        return
+    budget = 40
+    done = 0
+    for items in grouped.values():
+        for it in items:
+            if budget <= 0:
+                break
+            zh = translate_zh(it["title"])
+            budget -= 1
+            if zh:
+                it["zh"] = zh
+                done += 1
+                time.sleep(0.2)
+    if done:
+        print(f"[ok] 已翻译 {done} 条英文标题")
+
+
 def classify(item, categories):
     """返回 (最佳分类key, 得分, 命中词)。无命中返回 (None, 0, [])。"""
     text = f"{item['title']} {item['summary']}".lower()
@@ -303,6 +342,8 @@ def render_report(grouped, config, now, total_scanned):
         for i, it in enumerate(top, 1):
             lines.append(f"{i}. **{it['title']}** — {it['source']} "
                          f"(热度分 {it['score']},命中: {', '.join(it['hits'][:5])})  ")
+            if it.get("zh"):
+                lines.append(f"   译: {it['zh']}  ")
             lines.append(f"   {it['link']}")
         lines.append("")
 
@@ -315,6 +356,8 @@ def render_report(grouped, config, now, total_scanned):
         for it in sorted(items, key=lambda x: -x["score"]):
             t = it["time"].astimezone(CST).strftime("%m-%d %H:%M") if it["time"] else "时间未知"
             lines.append(f"- **[{it['title']}]({it['link']})**  ")
+            if it.get("zh"):
+                lines.append(f"  译: {it['zh']}  ")
             lines.append(f"  {it['source']} · {t} · 分数 {it['score']}  ")
             if it["summary"]:
                 lines.append(f"  {it['summary'][:180]}")
@@ -433,6 +476,8 @@ def run(args):
 
     if not args.demo:
         save_seen(seen)
+        # 2.5 英文标题翻译成中文(--demo 保持离线,不翻译)
+        translate_items(grouped, config)
 
     # 3. 生成报告
     os.makedirs(REPORT_DIR, exist_ok=True)
@@ -449,7 +494,7 @@ def run(args):
         digest_lines = []
         for k, cat in config["categories"].items():
             for it in sorted(grouped[k], key=lambda x: -x["score"])[:3]:
-                digest_lines.append(f"· {it['title']}\n  {it['link']}")
+                digest_lines.append(f"· {it.get('zh') or it['title']}\n  {it['link']}")
         notify(f"AI 雷达 {now.strftime('%m-%d')}: 收录 {collected} 条",
                "\n".join(digest_lines))
     return path
